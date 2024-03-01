@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { env, transport, emailTemplate } from "./utils.mjs";
 import { errorBoundary, notFound, reqLogger } from "./middlewares.mjs";
+import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
 export const __dirname = dirname(__filename);
@@ -15,10 +16,11 @@ const app = express();
 app.disable("x-powered-by");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 app.use(reqLogger);
-
 app.use("/", express.static(join(__dirname, "public")));
 app.use("/", express.static("public"));
+
 app.post("/notify", async (req, res) => {
 	try {
 		const { passphrase } = req.body;
