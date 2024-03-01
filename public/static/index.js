@@ -27,7 +27,7 @@ async function handleNetworkCall(e) {
 			throw new Error("Invalid Passphrase!");
 		}
 
-		const response = await fetch(`http://${location.host}/api/notify/random`, {
+		const response = await fetch(`${location.protocol}//${location.host}/api/notify/random`, {
 			headers: { "Content-Type": "application/json" },
 			method: "POST",
 			body: JSON.stringify({ passphrase: networkData.payload }),
