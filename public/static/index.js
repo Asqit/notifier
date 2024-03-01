@@ -18,13 +18,13 @@ const handleNetworkCall = async (e) => {
 			throw new Error("Invalid Passphrase!");
 		}
 
-		const response = await fetch("http://localhost:8080/notify", {
+		const response = await fetch(`http://${location.host.split(":")[0]}:8080/notify`, {
 			headers: { "Content-Type": "application/json" },
 			method: "POST",
 			body: JSON.stringify({ passphrase: networkData.payload }),
 		});
 
-		if (response.status !== 200) {
+		if (response.status !== 201) {
 			networkData.isError = true;
 			networkData.error = JSON.stringify(response.statusText);
 			return;
