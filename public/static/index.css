@@ -1,0 +1,85 @@
+*::before,
+*,
+*::after {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+	outline-color: transparent;
+}
+
+body {
+	font-family: sans-serif;
+	line-height: 1.2;
+	background-color: rgb(20, 18, 18);
+	color: white;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	line-height: 1.5;
+}
+
+ul > li {
+	list-style-type: none;
+}
+
+img {
+	width: 100%;
+	display: block;
+}
+
+/*--------------------------------------------------------------------*/
+
+main {
+	width: 100%;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+form {
+	width: 320px;
+	height: 320px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 2rem;
+}
+
+input {
+	width: 100%;
+	padding: 1rem;
+	border-radius: 0.5rem;
+	border: 1px solid white;
+	font-family: monospace;
+	background-color: transparent;
+	font-weight: bold;
+	color: white;
+}
+
+button {
+	width: 100%;
+	display: inline-block;
+	padding: 0.5rem 1.5rem;
+	background-color: red;
+	color: white;
+	border: none;
+	font-weight: bold;
+	cursor: pointer;
+	font-size: 1.5rem;
+	border-radius: 0.5rem;
+}
+
+button:hover {
+	opacity: 0.8;
+}
+
+button:active {
+	opacity: 0.6;
+}
