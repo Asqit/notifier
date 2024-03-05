@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"log"
 	"math/rand"
 	"net/http"
+	"os"
 
 	"github.com/asqit/notifier/internal/utils"
 	"github.com/gofiber/fiber/v2"
@@ -14,21 +16,52 @@ type PassphrasePayload struct {
 	Passphrase string `json:"passphrase"`
 }
 
-func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
-	data := new(PassphrasePayload)
+type RandomMessage struct {
+	Title       string
+	Paragraph_1 string
+	Paragraph_2 string
+	Paragraph_3 string
+	Signature   string
+}
 
-	if err := c.BodyParser(data); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"message": "bad request!",
-		})
+func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
+	var payload = new(PassphrasePayload)
+	if err := c.BodyParser(payload); err != nil {
+		return c.SendStatus(http.StatusBadRequest)
+	}
+
+	passphrase := utils.GetENV("PASSPHRASE")
+	if payload.Passphrase != passphrase {
+		return c.SendStatus(http.StatusUnauthorized)
 	}
 
 	messages := utils.ReadMessages()
-	i := rand.Intn(len(messages.Messages))
+	message := messages.Messages[rand.Intn(len(messages.Messages))]
+	path, err := os.Getwd()
 
-	return c.Status(http.StatusCreated).JSON(fiber.Map{
-		"data": messages.Messages[i],
-	})
+	if err != nil {
+		log.Fatalf("directory %v does not exists", err)
+	}
+
+	mail := utils.NewRequest([]string{"ondrejtucek9@gmail.com"}, "Myslím na Tebe", "")
+	body := RandomMessage{
+		Title:       "Milá Míšo",
+		Paragraph_1: message[0],
+		Paragraph_2: message[1],
+		Paragraph_3: message[2],
+		Signature:   message[3],
+	}
+	err = mail.ParseTemplate(path+"/assets/templates/random_message.html", body)
+	if err != nil {
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	ok, _ := mail.SendEmail()
+	if !ok {
+		return c.SendStatus(http.StatusUnauthorized)
+	}
+
+	return c.SendStatus(http.StatusCreated)
 }
 
 func (handler *NotifyHandler) sendRandomPoem(c *fiber.Ctx) error {

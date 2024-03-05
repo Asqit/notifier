@@ -16,10 +16,6 @@ func main() {
 	app.Static("/", "./public")
 
 	api := app.Group("/api")
-	api.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
-
 	handlers.Register(api)
 	port := utils.GetENV("PORT")
 	log.Fatal(app.Listen(port))
