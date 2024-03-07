@@ -2,40 +2,42 @@ package utils
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"log"
+	"mime"
 	"net/smtp"
+	"path/filepath"
 )
 
 type Request struct {
-	to      []string
-	subject string
-	body    string
+	to       []string
+	subject  string
+	body     string
+	mimeType string
 }
+
+// Template for mime type...usage: fmt.Sprintf(MIME_TYPE_TEMPLATE, "text/plain; charset=utf-8")
+const MIME_TYPE_TEMPLATE = "MIME-version: 1.0;\nContent-Type: %s; \n\n"
 
 func NewRequest(to []string, subject, body string) *Request {
 	return &Request{
-		to:      to,
-		subject: subject,
-		body:    body,
+		to:       to,
+		subject:  subject,
+		body:     body,
+		mimeType: fmt.Sprintf(MIME_TYPE_TEMPLATE, "text/plain; charset=utf-8"),
 	}
 }
 
 func (r *Request) SendEmail() (bool, error) {
 	from := GetENV("SMTP_USR")
 	pass := GetENV("SMTP_PWD")
-	to := GetENV("RECEIVER")
-
-	// TODO: Figure-out the MIME type programmatically
-	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	msg := "From: " + from + "\n" +
-		"To: " + to + "\n" +
-		"Subject: " + r.subject + "\n" + mime + "\n" +
-		r.body
+	to := r.to
+	msg := fmt.Sprintf("From: %s\nTo: %s\nSubject: %s\n%s\n%s", from, to[0], r.subject, r.mimeType, r.body)
 
 	err := smtp.SendMail(GetENV("SMTP_HOST")+":587",
 		smtp.PlainAuth("", from, pass, GetENV("SMTP_HOST")),
-		from, []string{to}, []byte(msg))
+		from, r.to, []byte(msg))
 
 	if err != nil {
 		log.Printf("smtp error: %s", err)
@@ -54,6 +56,10 @@ func (r *Request) ParseTemplate(templateFileName string, data interface{}) error
 	if err = t.Execute(buf, data); err != nil {
 		return err
 	}
+
+	fileExtension := filepath.Ext(templateFileName)
+	mimeType := mime.TypeByExtension(fileExtension)
+	r.mimeType = fmt.Sprintf(MIME_TYPE_TEMPLATE, mimeType)
 	r.body = buf.String()
 	return nil
 }
