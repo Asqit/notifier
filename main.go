@@ -25,5 +25,9 @@ func main() {
 	handlers.Register(api)
 
 	port := utils.GetENV("PORT")
+	if port == "" {
+		port = ":8080"
+	}
+
 	log.Fatal(app.Listen(port))
 }
