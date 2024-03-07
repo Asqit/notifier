@@ -17,7 +17,7 @@ type Messages struct {
 func GetENV(key string) string {
 	err := godotenv.Load(".env")
 	if err != nil {
-		fmt.Println("Error loading '.env' file")
+		fmt.Printf("Failed to load '.env' file %v", err)
 	}
 	return os.Getenv(key)
 }
