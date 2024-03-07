@@ -60,6 +60,7 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 	// TODO: This call is taking longest time of the whole request
 	// find a better/faster way to send an email.
 	ok, err := mail.SendEmail()
+
 	if err != nil {
 		return c.SendStatus(http.StatusInternalServerError)
 	}
@@ -68,7 +69,9 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 		return c.SendStatus(http.StatusUnauthorized)
 	}
 
-	return c.SendStatus(http.StatusCreated)
+	return c.Status(http.StatusCreated).JSON(fiber.Map{
+		"message": message,
+	})
 }
 
 // TODO: Finish implementation
