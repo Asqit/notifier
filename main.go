@@ -26,7 +26,7 @@ func main() {
 
 	port := utils.GetENV("PORT")
 	if port == "" {
-		port = ":10000"
+		port = ":8080"
 	}
 
 	log.Fatal(app.Listen(port))

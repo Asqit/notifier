@@ -6,26 +6,17 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/asqit/notifier/internal/models"
 	"github.com/asqit/notifier/internal/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
 type NotifyHandler struct{}
 
-type PassphrasePayload struct {
-	Passphrase string `json:"passphrase"`
-}
-type RandomMessage struct {
-	Title       string
-	Paragraph_1 string
-	Paragraph_2 string
-	Paragraph_3 string
-	Signature   string
-}
+var TO = []string{utils.GetENV("RECEIVER")}
 
-// TODO: Refactor this handler
 func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
-	var payload = new(PassphrasePayload)
+	var payload = new(models.PassphrasePayload)
 	if err := c.BodyParser(payload); err != nil {
 		return c.SendStatus(http.StatusBadRequest)
 	}
@@ -44,8 +35,8 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 		return c.SendStatus(http.StatusInternalServerError)
 	}
 
-	mail := utils.NewRequest([]string{"ondrejtucek9@gmail.com"}, "Myslím na Tebe", "")
-	body := RandomMessage{
+	mail := utils.NewRequest(TO, "Myslím na Tebe", "")
+	body := models.RandomMessage{
 		Title:       "Milá Míšo",
 		Paragraph_1: message[0],
 		Paragraph_2: message[1],
@@ -74,12 +65,42 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 	})
 }
 
-// TODO: Finish implementation
-func (handler *NotifyHandler) sendRandomPoem(c *fiber.Ctx) error {
-	return c.SendStatus(http.StatusNotImplemented)
+func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
+	var payload = new(models.CustomMessagePayload)
+	if err := c.BodyParser(&payload); err != nil {
+		return c.SendStatus(http.StatusBadRequest)
+	}
+
+	passphrase := utils.GetENV("PASSPHRASE")
+	if passphrase != payload.Passphrase {
+		return c.SendStatus(http.StatusUnauthorized)
+	}
+
+	path, err := os.Getwd()
+	if err != nil {
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	mail := utils.NewRequest(TO, "Myslím na Tebe", "")
+	mail.ParseTemplate(path+"/assets/templates/custom_message", models.CustomMessagePayload{
+		Title:     payload.Title,
+		Message:   payload.Message,
+		Signature: payload.Signature,
+	})
+
+	ok, err := mail.SendEmail()
+	if err != nil {
+		return c.SendStatus(http.StatusUnauthorized)
+	}
+
+	if !ok {
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	return c.SendStatus(http.StatusCreated)
 }
 
 // TODO: Finish implementation
-func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
+func (handler *NotifyHandler) sendRandomPoem(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNotImplemented)
 }
