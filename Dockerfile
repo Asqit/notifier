@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Kompilace Go aplikace
-RUN go build -o myapp .
+RUN go build -o app .
 
 # Druhý stavební etapa pro snížení velikosti obrazu
 FROM alpine:latest  
@@ -17,10 +17,10 @@ FROM alpine:latest
 WORKDIR /root/
 
 # Kopírování binárního souboru z první etapy
-COPY --from=builder /app/myapp .
+COPY --from=builder /app/app .
 
 # Nastavení portu, na kterém bude API běžet
 EXPOSE 8080
 
 # Spuštění API
-CMD ["./myapp"]
+CMD ["./app"]

@@ -4,18 +4,28 @@
 		<title>Notifier</title>
 		<meta charset="UTF-8" />
 		<link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+		<style>
+			*::before,
+			*::after,
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+				outline-color: transparent;
+			}
+		</style>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="/static/index.css" />
+		<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
 		<script src="/static/index.mjs" type="module" defer></script>
 	</head>
-	<body>
-		<header>
+	<body class="font-mono bg-zinc-900 text-white">
+		<header class="p-8 sm:p-16 md:p-32 bg-emerald-500 text-white">
 			<h1>Notifier</h1>
 			<h2>Let your loved ones know, that you are thinking about them!</h2>
 		</header>
 		<div id="root"></div>
-		<footer>
-			<div class="container">
+		<footer class="p-8">
+			<div class="container mx-auto max-w-7xl rounded-md bg-white text-black p-16">
 				<p>An application written with ♥ by <a href="https://github.com/asqit" target="_blank">Ondřej Tuček</a> 🧑‍💻</p>
 				<p>Feedback? Issue? <a href="https://github.com/Asqit/notifier/issues" target="_blank">Let me know!</a></p>
 			</div>

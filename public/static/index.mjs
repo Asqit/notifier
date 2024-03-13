@@ -8,8 +8,8 @@ import { html } from "https://esm.sh/@arrow-js/core";
 import { CustomMessage, RandomMessage, Tabs } from "./components/index.mjs";
 
 const app = html`
-	<main>
-		<div class="container">
+	<main class="p-16">
+		<div class="container mx-auto max-w-7xl">
 			${Tabs({
 				tabs: [
 					{
