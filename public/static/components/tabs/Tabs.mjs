@@ -29,7 +29,7 @@ export function Tabs(props) {
 					state.tabs.map(
 						(tab, index) => html`
 							<button
-								class="p-1 border-none cursor-pointer text-white ${state.selectedTab === index
+								class="p-3 rounded-md border-none cursor-pointer text-white ${state.selectedTab === index
 									? "bg-zinc-500"
 									: "bg-zinc-600"}"
 								@click="${() => (state.selectedTab = index)}"

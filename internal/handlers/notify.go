@@ -65,6 +65,7 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 	})
 }
 
+// POST /custom
 func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
 	var payload = new(models.CustomMessagePayload)
 	if err := c.BodyParser(&payload); err != nil {
@@ -82,7 +83,7 @@ func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
 	}
 
 	mail := utils.NewRequest(TO, "Myslím na Tebe", "")
-	mail.ParseTemplate(path+"/assets/templates/custom_message", models.CustomMessagePayload{
+	mail.ParseTemplate(path+"/assets/templates/custom_message.html", models.CustomMessagePayload{
 		Title:     payload.Title,
 		Message:   payload.Message,
 		Signature: payload.Signature,

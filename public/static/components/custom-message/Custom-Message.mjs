@@ -17,12 +17,28 @@ const INITIAL_STATE = {
 export function CustomMessage() {
 	const data = reactive({ ...INITIAL_STATE });
 
+	const checkPayload = () => {
+		Object.keys(data.payload).map((name) => {
+			if (!data.payload[name]) {
+				return false;
+			}
+		});
+
+		return true;
+	};
+
 	const handleFormSubmission = async (e) => {
 		try {
 			e.preventDefault();
 			data.isLoading = true;
 
-			await fetch(`${location.protocol}//${location.host}/api/notify/random`, {
+			if (!checkPayload()) {
+				data.isError = true;
+				data.error = "Invalid payload";
+				return;
+			}
+
+			await fetch(`${location.protocol}//${location.host}/api/notify/custom`, {
 				headers: { "Content-Type": "application/json" },
 				method: "POST",
 				body: JSON.stringify(data.payload),
