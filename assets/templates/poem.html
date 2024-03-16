@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Poem</title>
+		<style type="text/css">
+			/* weight axis: 300 - 700 */
+			@import url("https://fonts.googleapis.com/css2?family=Lemonada:wght@300..700&display=swap");
+			.lemonada-regular {
+				font-family: "Lemonada", cursive;
+				font-size: 18px;
+				line-height: 1.5;
+				font-weight: 300;
+				font-style: normal;
+			}
+
+			/* Table styling for background and border */
+			.poem {
+				background-color: #fbefcc;
+				border-collapse: collapse;
+				border-radius: 5px;
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.212);
+			}
+
+			/* Text inside the table */
+			td {
+				padding: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td align="center">
+					<table class="poem" width="600" cellspacing="0" cellpadding="0" border="0">
+						<tr>
+							<td class="lemonada-regular">
+								<div>{{. | NewlineToParagraph}}</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

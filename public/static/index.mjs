@@ -20,6 +20,10 @@ const app = html`
 						title: "Custom Message",
 						body: CustomMessage(),
 					},
+					{
+						title: "Random Poem",
+						body: RandomMessage(true),
+					},
 				],
 			})}
 		</div>

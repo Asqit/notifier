@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"log"
+	"fmt"
 	"math/rand"
 	"net/http"
-	"os"
 
 	"github.com/asqit/notifier/internal/models"
 	"github.com/asqit/notifier/internal/utils"
@@ -14,36 +13,31 @@ import (
 type NotifyHandler struct{}
 
 var TO = []string{utils.GetENV("RECEIVER")}
+var WORKING_DIRECTORY_PATH = utils.GetWd()
+var PASSPHRASE = utils.GetENV("PASSPHRASE")
 
 func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
-	var payload = new(models.PassphrasePayload)
+	var payload = new(models.PassphraseBody)
 	if err := c.BodyParser(payload); err != nil {
 		return c.SendStatus(http.StatusBadRequest)
 	}
 
-	passphrase := utils.GetENV("PASSPHRASE")
-	if payload.Passphrase != passphrase {
+	if payload.Passphrase != PASSPHRASE {
 		return c.SendStatus(http.StatusUnauthorized)
 	}
 
-	messages := utils.ReadMessages()
+	messages := utils.ParseJSON[models.MessagesAsset](WORKING_DIRECTORY_PATH + "/assets/messages.json")
 	message := messages.Messages[rand.Intn(len(messages.Messages))]
-	path, err := os.Getwd()
 
-	if err != nil {
-		log.Fatalf("directory %v does not exists", err)
-		return c.SendStatus(http.StatusInternalServerError)
-	}
-
-	mail := utils.NewRequest(TO, "Myslím na Tebe", "")
-	body := models.RandomMessage{
+	mail := utils.NewRequest(TO, "You're in my mind right now 💭❤️", "")
+	body := models.RandomMessageAsset{
 		Title:       "Milá Míšo",
 		Paragraph_1: message[0],
 		Paragraph_2: message[1],
 		Paragraph_3: message[2],
 		Signature:   message[3],
 	}
-	err = mail.ParseTemplate(path+"/assets/templates/random_message.html", body)
+	err := mail.ParseTemplate(WORKING_DIRECTORY_PATH+"/assets/templates/random_message.html", body)
 	if err != nil {
 		return c.SendStatus(http.StatusInternalServerError)
 	}
@@ -67,23 +61,17 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 
 // POST /custom
 func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
-	var payload = new(models.CustomMessagePayload)
+	var payload = new(models.CustomMessageBody)
 	if err := c.BodyParser(&payload); err != nil {
 		return c.SendStatus(http.StatusBadRequest)
 	}
 
-	passphrase := utils.GetENV("PASSPHRASE")
-	if passphrase != payload.Passphrase {
+	if PASSPHRASE != payload.Passphrase {
 		return c.SendStatus(http.StatusUnauthorized)
 	}
 
-	path, err := os.Getwd()
-	if err != nil {
-		return c.SendStatus(http.StatusInternalServerError)
-	}
-
 	mail := utils.NewRequest(TO, "Myslím na Tebe", "")
-	mail.ParseTemplate(path+"/assets/templates/custom_message.html", models.CustomMessagePayload{
+	mail.ParseTemplate(WORKING_DIRECTORY_PATH+"/assets/templates/custom_message.html", models.CustomMessageBody{
 		Title:     payload.Title,
 		Message:   payload.Message,
 		Signature: payload.Signature,
@@ -103,5 +91,30 @@ func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
 
 // TODO: Finish implementation
 func (handler *NotifyHandler) sendRandomPoem(c *fiber.Ctx) error {
-	return c.SendStatus(http.StatusNotImplemented)
+	var payload = new(models.PassphraseBody)
+	if err := c.BodyParser(&payload); err != nil {
+		return c.SendStatus(http.StatusBadRequest)
+	}
+
+	if payload.Passphrase != PASSPHRASE {
+		return c.SendStatus(http.StatusUnauthorized)
+	}
+
+	poems := utils.ParseJSON[models.PoemsAsset](WORKING_DIRECTORY_PATH + "/assets/poems.json")
+	selectedPoem := poems.Poems[rand.Intn(len(poems.Poems))]
+
+	mail := utils.NewRequest(TO, "Few lines, that may cheer you up a bit", "")
+	mail.Body = utils.ParsePoem(WORKING_DIRECTORY_PATH+"/assets/templates/poem.html", selectedPoem)
+	mail.MimeType = fmt.Sprintf(utils.MIME_TYPE_TEMPLATE, "text/html; charset=utf-8")
+	ok, err := mail.SendEmail()
+
+	if err != nil {
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	if !ok {
+		return c.SendStatus(http.StatusUnauthorized)
+	}
+
+	return c.SendStatus(http.StatusCreated)
 }

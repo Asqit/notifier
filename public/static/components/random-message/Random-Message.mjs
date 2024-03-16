@@ -9,7 +9,7 @@ const INITIAL_STATE = {
 	payload: "",
 };
 
-export function RandomMessage() {
+export function RandomMessage(isPoem = false) {
 	const data = reactive({ ...INITIAL_STATE });
 
 	const handleFormSubmission = async (e) => {
@@ -23,7 +23,7 @@ export function RandomMessage() {
 				return;
 			}
 
-			await fetch(`${location.protocol}//${location.host}/api/notify/random`, {
+			await fetch(`${location.protocol}//${location.host}/api/notify/${isPoem ? "poem" : "random"}`, {
 				headers: { "Content-Type": "application/json" },
 				method: "POST",
 				body: JSON.stringify({ passphrase: data.payload }),

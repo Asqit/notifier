@@ -1,26 +1,18 @@
-# Základní obraz s Go runtime
-FROM golang:1.17-alpine AS builder
-
-# Nastavení pracovního adresáře
+# Import base image and create working directory
+FROM golang:latest       
 WORKDIR /app
 
-# Kopírování zdrojových souborů do kontejneru
+# Copy everything to the work directory
 COPY . .
 
-# Kompilace Go aplikace
-RUN go build -o app .
+# Download all dependencies
+RUN go mod download
 
-# Druhý stavební etapa pro snížení velikosti obrazu
-FROM alpine:latest  
+# Compile the app
+RUN CGO_ENABLED=0 GOOS=linux go build -o /notifier
 
-# Nastavení pracovního adresáře
-WORKDIR /root/
-
-# Kopírování binárního souboru z první etapy
-COPY --from=builder /app/app .
-
-# Nastavení portu, na kterém bude API běžet
+# Expose PORT for the app
 EXPOSE 8080
 
-# Spuštění API
-CMD ["./app"]
+# Run the app
+CMD ["/notifier"]
