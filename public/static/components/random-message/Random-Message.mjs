@@ -23,6 +23,7 @@ export function RandomMessage(isPoem = false) {
 				return;
 			}
 
+
 			await fetch(`${location.protocol}//${location.host}/api/notify/${isPoem ? "poem" : "random"}`, {
 				headers: { "Content-Type": "application/json" },
 				method: "POST",
@@ -39,6 +40,7 @@ export function RandomMessage(isPoem = false) {
 		}
 	};
 
+
 	return html`<form @submit="${(e) => handleFormSubmission(e)}" class="max-w-2xl min-w-[480px]">
 		${() =>
 			data.isSuccess
@@ -51,6 +53,7 @@ export function RandomMessage(isPoem = false) {
 		${() =>
 			data.isError
 				? html` <div class="p-8 bg-red-500 text-white rounded-md outline outline-red-600 my-2">
+
 						<h4>Error Occurred</h4>
 						<p>${() => data.error}</p>
 				  </div>`

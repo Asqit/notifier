@@ -1,5 +1,6 @@
 package models
 
+
 type PassphraseBody struct {
 	Passphrase string `json:"passphrase"`
 }
@@ -26,3 +27,4 @@ type RandomMessageAsset struct {
 	Paragraph_3 string
 	Signature   string
 }
+

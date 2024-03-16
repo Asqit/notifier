@@ -17,6 +17,7 @@ const INITIAL_STATE = {
 export function CustomMessage() {
 	const data = reactive({ ...INITIAL_STATE });
 
+
 	const checkPayload = () => {
 		Object.keys(data.payload).map((name) => {
 			if (!data.payload[name]) {
@@ -39,6 +40,7 @@ export function CustomMessage() {
 			}
 
 			await fetch(`${location.protocol}//${location.host}/api/notify/custom`, {
+
 				headers: { "Content-Type": "application/json" },
 				method: "POST",
 				body: JSON.stringify(data.payload),
@@ -54,6 +56,7 @@ export function CustomMessage() {
 		}
 	};
 
+<
 	return html`<form @submit="${handleFormSubmission}" class="max-w-2xl min-w-[480px]">
 		${() =>
 			data.isSuccess
@@ -66,10 +69,12 @@ export function CustomMessage() {
 		${() =>
 			data.isError
 				? html` <div class="p-8 bg-red-500 text-white rounded-md outline outline-red-600 my-2">
+
 						<h4>Error Occurred</h4>
 						<p>${() => data.error}</p>
 				  </div>`
 				: ""}
+
 		<div class="flex flex-col gap-2 my-4">
 			<label for="title">Title</label>
 			<input
@@ -82,26 +87,33 @@ export function CustomMessage() {
 		</div>
 
 		<div class="flex flex-col gap-2 my-4">
+
 			<label for="signature">Signature</label>
 			<input
 				type="text"
 				id="signature"
 				placeholder="secret..."
+
 				class="p-2 text-xl rounded-md outline focus:outline-emerald-500 active:outline-emerald-500"
+
 				@input="${(e) => (data.payload.signature = e.target.value)}"
 			/>
 		</div>
 
 		<div class="flex flex-col gap-2 my-4">
+
 			<label for="passphrase">Passphrase</label>
 			<input
 				type="password"
 				id="passphrase"
 				placeholder="secret..."
+
 				class="p-2 text-xl rounded-md outline focus:outline-emerald-500 active:outline-emerald-500"
+
 				@input="${(e) => (data.payload.passphrase = e.target.value)}"
 			/>
 		</div>
+
 
 		<div class="flex flex-col gap-2 my-4">
 			<label for="message">Message</label>
@@ -120,5 +132,6 @@ export function CustomMessage() {
 		>
 			notify!
 		</button>
+
 	</form>`;
 }

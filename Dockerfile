@@ -1,3 +1,4 @@
+
 # Import base image and create working directory
 FROM golang:latest       
 WORKDIR /app

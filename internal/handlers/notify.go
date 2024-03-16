@@ -18,6 +18,7 @@ var PASSPHRASE = utils.GetENV("PASSPHRASE")
 
 func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 	var payload = new(models.PassphraseBody)
+
 	if err := c.BodyParser(payload); err != nil {
 		return c.SendStatus(http.StatusBadRequest)
 	}
@@ -29,8 +30,10 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 	messages := utils.ParseJSON[models.MessagesAsset](WORKING_DIRECTORY_PATH + "/assets/messages.json")
 	message := messages.Messages[rand.Intn(len(messages.Messages))]
 
+
 	mail := utils.NewRequest(TO, "You're in my mind right now 💭❤️", "")
 	body := models.RandomMessageAsset{
+
 		Title:       "Milá Míšo",
 		Paragraph_1: message[0],
 		Paragraph_2: message[1],
@@ -59,12 +62,15 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 	})
 }
 
+
 // POST /custom
 func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
 	var payload = new(models.CustomMessageBody)
+
 	if err := c.BodyParser(&payload); err != nil {
 		return c.SendStatus(http.StatusBadRequest)
 	}
+
 
 	if PASSPHRASE != payload.Passphrase {
 		return c.SendStatus(http.StatusUnauthorized)
@@ -72,6 +78,7 @@ func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
 
 	mail := utils.NewRequest(TO, "Myslím na Tebe", "")
 	mail.ParseTemplate(WORKING_DIRECTORY_PATH+"/assets/templates/custom_message.html", models.CustomMessageBody{
+
 		Title:     payload.Title,
 		Message:   payload.Message,
 		Signature: payload.Signature,
