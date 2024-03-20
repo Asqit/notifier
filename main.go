@@ -31,5 +31,5 @@ func main() {
 		port = ":8080"
 	}
 
-	log.Fatal(app.Listen("localhost" + port))
+	log.Fatal(app.Listen(":8080"))
 }
