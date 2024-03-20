@@ -30,7 +30,6 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 	messages := utils.ParseJSON[models.MessagesAsset](WORKING_DIRECTORY_PATH + "/assets/messages.json")
 	message := messages.Messages[rand.Intn(len(messages.Messages))]
 
-
 	mail := utils.NewRequest(TO, "You're in my mind right now 💭❤️", "")
 	body := models.RandomMessageAsset{
 
@@ -62,7 +61,6 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 	})
 }
 
-
 // POST /custom
 func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
 	var payload = new(models.CustomMessageBody)
@@ -70,7 +68,6 @@ func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
 	if err := c.BodyParser(&payload); err != nil {
 		return c.SendStatus(http.StatusBadRequest)
 	}
-
 
 	if PASSPHRASE != payload.Passphrase {
 		return c.SendStatus(http.StatusUnauthorized)
@@ -96,7 +93,6 @@ func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusCreated)
 }
 
-// TODO: Finish implementation
 func (handler *NotifyHandler) sendRandomPoem(c *fiber.Ctx) error {
 	var payload = new(models.PassphraseBody)
 	if err := c.BodyParser(&payload); err != nil {
