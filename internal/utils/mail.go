@@ -33,11 +33,13 @@ func (r *Request) SendEmail() (bool, error) {
 	from := GetENV("SMTP_USR")
 	pass := GetENV("SMTP_PWD")
 	to := r.To
-	msg := fmt.Sprintf("From: %s\nTo: %s\nSubject: %s\n%s\n%s", from, to[0], r.Subject, r.MimeType, r.Body)
+
+	var msgBuffer bytes.Buffer
+	msgBuffer.WriteString(fmt.Sprintf("From: %s\nTo: %s\nSubject: %s\n%s\n%s", from, to[0], r.Subject, r.MimeType, r.Body))
 
 	err := smtp.SendMail(GetENV("SMTP_HOST")+":587",
 		smtp.PlainAuth("", from, pass, GetENV("SMTP_HOST")),
-		from, r.To, []byte(msg))
+		from, r.To, msgBuffer.Bytes())
 
 	if err != nil {
 		log.Printf("smtp error: %s", err)

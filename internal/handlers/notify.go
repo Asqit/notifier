@@ -44,8 +44,6 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 		return c.SendStatus(http.StatusInternalServerError)
 	}
 
-	// TODO: This call is taking longest time of the whole request
-	// find a better/faster way to send an email.
 	ok, err := mail.SendEmail()
 
 	if err != nil {
@@ -61,7 +59,6 @@ func (handler *NotifyHandler) sendRandomMessage(c *fiber.Ctx) error {
 	})
 }
 
-// POST /custom
 func (handler *NotifyHandler) sendCustomMessage(c *fiber.Ctx) error {
 	var payload = new(models.CustomMessageBody)
 
@@ -106,7 +103,7 @@ func (handler *NotifyHandler) sendRandomPoem(c *fiber.Ctx) error {
 	poems := utils.ParseJSON[models.PoemsAsset](WORKING_DIRECTORY_PATH + "/assets/poems.json")
 	selectedPoem := poems.Poems[rand.Intn(len(poems.Poems))]
 
-	mail := utils.NewRequest(TO, "Few lines, that may cheer you up a bit", "")
+	mail := utils.NewRequest(TO, "Few lines that may cheer you up a bit", "")
 	mail.Body = utils.ParsePoem(WORKING_DIRECTORY_PATH+"/assets/templates/poem.html", selectedPoem)
 	mail.MimeType = fmt.Sprintf(utils.MIME_TYPE_TEMPLATE, "text/html; charset=utf-8")
 	ok, err := mail.SendEmail()
@@ -119,5 +116,7 @@ func (handler *NotifyHandler) sendRandomPoem(c *fiber.Ctx) error {
 		return c.SendStatus(http.StatusUnauthorized)
 	}
 
-	return c.SendStatus(http.StatusCreated)
+	return c.Status(http.StatusCreated).JSON(fiber.Map{
+		"poem": selectedPoem,
+	})
 }
