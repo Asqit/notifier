@@ -1,4 +1,6 @@
 import { type PageProps } from "$fresh/server.ts";
+
+// prettier-ignore
 export default function App({ Component }: PageProps) {
   return (
     <html>
@@ -7,6 +9,12 @@ export default function App({ Component }: PageProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>client</title>
         <link rel="stylesheet" href="/styles.css" />
+        <link
+          crossorigin="use-credentials"
+          rel="manifest"
+          href="/manifest.webmanifest"
+        />
+        <script type="module" src={"s.mjs"}></script>
       </head>
       <body>
         <Component />
