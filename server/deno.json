@@ -1,0 +1,10 @@
+{
+  "tasks": {
+    "dev": "deno run --watch -A main.ts"
+  },
+  "imports": {
+    "@cross/jwt": "jsr:@cross/jwt@^0.5.0",
+    "@oak/oak": "jsr:@oak/oak@^16.1.0",
+    "@ts-rex/bcrypt": "jsr:@ts-rex/bcrypt@^1.0.3"
+  }
+}
