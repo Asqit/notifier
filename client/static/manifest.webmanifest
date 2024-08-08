@@ -1,5 +1,4 @@
 {
-  "start_url": "/",
   "name": "Poke - Let your close one know, that you are thinking about them",
   "short_name": "poke",
   "icons": [
@@ -14,8 +13,7 @@
       "type": "image/png"
     }
   ],
-  "background_color": "#3367D6",
-  "display": "standalone",
-  "theme_color": "#3367D6",
-  "description": "Poke - Let your close one know, that you are thinking about them"
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
 }
