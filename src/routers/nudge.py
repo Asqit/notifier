@@ -17,6 +17,7 @@ router = APIRouter(prefix="/nudge", tags=["Nudge"])
 @router.post("/", status_code=201)
 async def create_nudge(data: CreateNudge, db: DbSession) -> Nudge:
     nudge = Nudge(**dict(data))
+    db.add(nudge)
     db.commit()
 
     return nudge
@@ -27,4 +28,5 @@ async def get_nudge_history(user: LoggedUser):
     return user.nudges_received
 
 
-# TODO: Perhaps real-time nudging 
+# TODO: Perhaps real-time nudging
+# TODO: Add nudge notification to all user devices (webpush)

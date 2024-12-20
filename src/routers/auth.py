@@ -83,6 +83,7 @@ async def register(data: CreateUser, db: DbSession):
     new_user = User(**dict(data), password_hash=hash_password(data.password))
     db.add(new_user)
     db.commit()
+    db.refresh(new_user)
 
     token = create_access_token(new_user.username, timedelta(minutes=20))
     return {
@@ -99,7 +100,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     
     token = create_access_token(user.username, timedelta(minutes=20))
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token, "token_type": "bearer", **user.model_dump()}
 
 
 @router.get("/me")
