@@ -1,6 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from src.routers import nudge, friendship, auth
+from src.routers import auth, users
 from src.utils.db import create_all
 
 app = FastAPI()
@@ -12,7 +12,7 @@ origins = [
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:3000"
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -24,6 +24,10 @@ app.add_middleware(
 )
 
 
-app.include_router(nudge.router)
-app.include_router(friendship.router)
+@app.get("/health", status_code=status.HTTP_200_OK)
+async def health_check():
+    return {"status": "ok"}
+
+
 app.include_router(auth.router)
+app.include_router(users.router)
