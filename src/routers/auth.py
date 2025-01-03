@@ -18,7 +18,7 @@ ALGORITHM: str = "HS256"
 TOKEN_EXPIRY: int = 30
 
 
-class Token(UserResponse):
+class AuthResponse(UserResponse):
     access_token: str
     token_type: str
 
@@ -47,9 +47,10 @@ def hash_password(plain: str) -> str:
 
 
 def authenticate_user(username: str, password: str, db: Session) -> DbUser | bool:
-    user: Optional[DbUser] = db.exec(
+    user: DbUser | None = db.exec(
         select(DbUser).where(DbUser.username == username)
     ).first()
+
     if not user:
         return False
     if not verify_password(password, user.password_hash):
@@ -83,7 +84,7 @@ async def get_current_user(token: Annotated[str, Depends(jwt_schema)], db: DbSes
 LoggedUser = Annotated[DbUser, Depends(get_current_user)]
 
 
-@router.post("/register", response_model=Token)
+@router.post("/register", response_model=AuthResponse)
 async def register(data: CreateUser, db: DbSession):
     conflict: DbUser | None = db.exec(
         select(DbUser)
@@ -105,17 +106,25 @@ async def register(data: CreateUser, db: DbSession):
     return {"access_token": token, "token_type": "bearer", **new_user.model_dump()}
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=AuthResponse)
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: DbSession
-) -> dict:
+):
     user = authenticate_user(form_data.username, form_data.password, db)
     if type(user) == bool:
         print(user)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
     token = create_access_token(user.username, timedelta(minutes=20))
-    return {"access_token": token, "token_type": "bearer", **user.model_dump()}
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "following": user.following,
+        "followers": user.followers,
+        "nudges_send": user.nudges_send,
+        "nudges_received": user.nudges_received,
+        **user.model_dump(),
+    }
 
 
 @router.get("/me", response_model=UserResponse)

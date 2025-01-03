@@ -29,6 +29,10 @@ class DbUser(SQLModel, table=True):
     email: str = Field(unique=True, index=True)
     password_hash: str = Field()
     created_at: datetime = Field(default_factory=time_now)
+    bio: str = Field(default="", max_length=160)
+    web: str = Field(default="")
+    location: str = Field(default="")
+    color: str = Field(default="#D6D6D6")
 
     nudges_send: List["DbNudge"] = Relationship(
         back_populates="sender",

@@ -15,6 +15,11 @@ class UserResponse(SQLModel, table=False):
     username: str
     email: str
     created_at: datetime
+    bio: str
+    web: str
+    location: str
+    color: str
+
     followers: Optional[List[FriendshipResponse]] = []
     following: Optional[List[FriendshipResponse]] = []
     nudges_send: Optional[List["NudgeResponse"]] = []
