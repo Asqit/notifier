@@ -117,37 +117,19 @@ async def update_user(data: UpdateUserRequest, user: LoggedUser, db: DbSession):
     return user
 
 
-@router.get("/followers", response_model=list[UserResponse])
+@router.get("/following", response_model=list[UserResponse])
 async def get_following(db: DbSession, user: LoggedUser):
-    following = user.following
-    response = [
-        UserResponse(
-            id=relation.following.id,  # type: ignore
-            username=relation.following.username,
-            email=relation.following.email,
-            bio=relation.following.bio,
-            created_at=relation.following.created_at,
-        )
-        for relation in following
-    ]
-
+    following = db.exec(
+        select(DbFriendship).where(DbFriendship.follower_id == user.id)
+    ).all()
+    response = [followed.following for followed in following]
     return response
 
 
-@router.get("/following", response_model=list[UserResponse])
+@router.get("/followers", response_model=list[UserResponse])
 async def get_followers(db: DbSession, user: LoggedUser):
-    followers = user.followers
-    response = [
-        UserResponse(
-            id=follower.follower.id,  # type: ignore
-            username=follower.follower.username,
-            email=follower.follower.email,
-            bio=follower.follower.bio,
-            created_at=follower.follower.created_at,
-        )
-        for follower in followers
-    ]
-
+    followers = db.exec(select(DbFriendship).where(DbFriendship.following_id == user.id)).all()  # type: ignore
+    response = [follower.follower for follower in followers]
     return response
 
 
