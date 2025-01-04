@@ -1,0 +1,21 @@
+{
+  "version": "1",
+  "name": "Notifier",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ],
+  "proxy": {
+    "enabled": "global",
+    "protocol": "http",
+    "hostname": "http://localhost",
+    "port": 8000,
+    "auth": {
+      "enabled": false,
+      "username": "",
+      "password": ""
+    },
+    "bypassProxy": ""
+  }
+}
