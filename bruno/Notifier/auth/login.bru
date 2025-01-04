@@ -1,0 +1,21 @@
+meta {
+  name: login
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8000/auth/login
+  body: multipartForm
+  auth: none
+}
+
+body:form-urlencoded {
+  username: "test"
+  password: "test"
+}
+
+body:multipart-form {
+  username: test
+  password: test
+}
