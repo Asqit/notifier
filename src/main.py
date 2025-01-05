@@ -1,6 +1,6 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from src.routers import auth, users, nudge
+from src.routers import auth, users, nudge, subscription
 from src.utils.db import create_all
 
 app = FastAPI()
@@ -32,3 +32,4 @@ async def health_check():
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(nudge.router)
+app.include_router(subscription.router)
