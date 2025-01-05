@@ -10,6 +10,23 @@ class FriendshipResponse(SQLModel, table=False):
     following_id: int
 
 
+class DeviceResponse(SQLModel, table=False):
+    id: int
+    endpoint: str
+    p256dh: str
+    auth: str
+    user_id: int
+
+
+class NudgeResponse(SQLModel, table=False):
+    id: int
+    type: str
+    message: Optional[str]
+    created_at: datetime
+    sender_id: int
+    recipient_id: int
+
+
 class UserResponse(SQLModel, table=False):
     id: int
     username: str
@@ -22,19 +39,13 @@ class UserResponse(SQLModel, table=False):
 
     followers: Optional[List[FriendshipResponse]] = []
     following: Optional[List[FriendshipResponse]] = []
-    nudges_send: Optional[List["NudgeResponse"]] = []
-    nudges_received: Optional[List["NudgeResponse"]] = []
+    nudges_send: Optional[List[NudgeResponse]] = []
+    nudges_received: Optional[List[NudgeResponse]] = []
+    devices: Optional[List[DeviceResponse]] = []
 
 
-class NudgeResponse(SQLModel, table=False):
-    id: int
-    type: str
-    message: Optional[str]
-    created_at: datetime
-    sender_id: int
-    recipient_id: int
-
-
+# Ensure models are initialized properly
 FriendshipResponse.model_rebuild()
+DeviceResponse.model_rebuild()
 NudgeResponse.model_rebuild()
 UserResponse.model_rebuild()

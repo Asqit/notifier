@@ -1,10 +1,12 @@
 from fastapi import APIRouter, status, HTTPException
-from fastapi.concurrency import run_in_threadpool
 from webpush import WebPush, WebPushSubscription
+from sqlmodel import SQLModel, select
 import requests
 import os
 
+from src.models import DbUser, DbDevice
 from src.utils.env import get_var
+from src.utils.db import DbSession
 
 
 private_key_path: str = os.getcwd() + "/private_key.pem"
@@ -18,6 +20,21 @@ webpush = WebPush(
     private_key=private_key_path,
     subscriber=admin_email,
 )
+
+
+class SaveSubscriptionRequest(SQLModel):
+    subscription: WebPushSubscription
+    userId: int
+
+
+def post_notification(subscription: WebPushSubscription, payload: str):
+    message = webpush.get(message=payload, subscription=subscription)
+    response = requests.post(
+        url=str(subscription.endpoint),
+        data=message.encrypted,
+        headers=message.headers,  # type: ignore
+    )
+    return response.status_code
 
 
 @router.get("/key")
@@ -36,19 +53,40 @@ async def get_public_key():
     return {"public_key": application_server_key}
 
 
-@router.post("/subscribe")
-async def subscribe_user(subscription: WebPushSubscription):
-    message = webpush.get(message="Hello, world", subscription=subscription)
+@router.post("/subscribe", status_code=status.HTTP_201_CREATED)
+async def subscribe_user(payload: SaveSubscriptionRequest, db: DbSession):
+    user: DbUser | None = db.exec(
+        select(DbUser).where(DbUser.id == payload.userId)
+    ).first()
 
-    def send_push_notification():
-        response = requests.post(
-            url=str(subscription.endpoint),
-            data=message.encrypted,
-            headers=message.headers,  # type: ignore
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
-        response.raise_for_status()
-        return response
 
-    await run_in_threadpool(send_push_notification)
+    subscription = payload.subscription
+    existing_device = db.exec(
+        select(DbDevice)
+        .where(DbDevice.user_id == user.id)
+        .where(DbDevice.endpoint == subscription.endpoint)
+    ).first()
 
+    if existing_device:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Device already subscribed",
+        )
+
+    device = DbDevice(
+        user_id=user.id,  # type: ignore
+        endpoint=subscription.endpoint,  # type: ignore
+        p256dh=subscription.keys["p256dh"],  # type: ignore
+        auth=subscription.keys["auth"],  # type: ignore
+    )
+    db.add(device)
+    db.commit()
+    db.refresh(device)
+
+    print(device)
     return {"status": "ok"}

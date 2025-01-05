@@ -2,6 +2,7 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime, UTC
 from typing import List
+from webpush import WebPushSubscription
 
 
 def time_now() -> datetime:
@@ -33,6 +34,11 @@ class DbUser(SQLModel, table=True):
     web: str = Field(default="")
     location: str = Field(default="")
     color: str = Field(default="#D6D6D6")
+
+    devices: List["DbDevice"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"foreign_keys": "DbDevice.user_id"},
+    )
 
     nudges_send: List["DbNudge"] = Relationship(
         back_populates="sender",
@@ -75,4 +81,16 @@ class DbNudge(SQLModel, table=True):
     recipient: DbUser = Relationship(
         back_populates="nudges_received",
         sa_relationship_kwargs={"foreign_keys": "DbNudge.recipient_id"},
+    )
+
+
+class DbDevice(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    endpoint: str = Field(unique=True)
+    p256dh: str = Field(unique=True)
+    auth: str = Field(unique=True)
+    user_id: int = Field(foreign_key="dbuser.id")
+    user: DbUser = Relationship(
+        back_populates="devices",
+        sa_relationship_kwargs={"foreign_keys": "DbDevice.user_id"},
     )
