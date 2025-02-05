@@ -4,6 +4,15 @@ from datetime import datetime
 from typing import List, Optional
 
 
+class NotificationResponse(SQLModel, table=False):
+    id: int
+    is_open: bool
+    content: str
+    user_id: int
+    user: "UserResponse"
+    created_at: datetime
+
+
 class FriendshipResponse(SQLModel, table=False):
     id: int
     follower_id: int
@@ -49,3 +58,4 @@ FriendshipResponse.model_rebuild()
 DeviceResponse.model_rebuild()
 NudgeResponse.model_rebuild()
 UserResponse.model_rebuild()
+NotificationResponse.model_rebuild()

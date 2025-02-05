@@ -69,7 +69,7 @@ async def subscribe_user(payload: SaveSubscriptionRequest, db: DbSession):
     existing_device = db.exec(
         select(DbDevice)
         .where(DbDevice.user_id == user.id)
-        .where(DbDevice.endpoint == subscription.endpoint)
+        .where(DbDevice.endpoint == str(subscription.endpoint))
     ).first()
 
     if existing_device:
@@ -80,13 +80,12 @@ async def subscribe_user(payload: SaveSubscriptionRequest, db: DbSession):
 
     device = DbDevice(
         user_id=user.id,  # type: ignore
-        endpoint=subscription.endpoint,  # type: ignore
-        p256dh=subscription.keys["p256dh"],  # type: ignore
-        auth=subscription.keys["auth"],  # type: ignore
+        endpoint=str(subscription.endpoint),
+        p256dh=subscription.keys.p256dh,
+        auth=subscription.keys.auth,
     )
     db.add(device)
     db.commit()
     db.refresh(device)
 
-    print(device)
     return {"status": "ok"}

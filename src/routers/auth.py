@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, UTC
-from typing import Annotated, Optional
+from typing import Annotated
 from pydantic import BaseModel
 from sqlmodel import Session, select
 from fastapi import APIRouter, Depends, HTTPException, status

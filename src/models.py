@@ -2,11 +2,21 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime, UTC
 from typing import List
-from webpush import WebPushSubscription
 
 
 def time_now() -> datetime:
     return datetime.now(UTC)
+
+
+class DbNotification(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    is_open: bool = Field(default=True)
+    content: str = Field()
+    created_at: datetime = Field(default_factory=time_now)
+    user_id: int = Field(foreign_key="dbuser.id")
+    user: "DbUser" = Relationship(
+        back_populates="notifications",
+    )
 
 
 class DbFriendship(SQLModel, table=True):
@@ -34,6 +44,8 @@ class DbUser(SQLModel, table=True):
     web: str = Field(default="")
     location: str = Field(default="")
     color: str = Field(default="#D6D6D6")
+
+    notifications: List["DbNotification"] = Relationship(back_populates="user")
 
     devices: List["DbDevice"] = Relationship(
         back_populates="user",

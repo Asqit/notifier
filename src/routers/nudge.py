@@ -1,8 +1,10 @@
 from fastapi import APIRouter, status
 from sqlmodel import SQLModel, select
 from webpush import WebPushSubscription
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
 
-from src.models import DbNudge, DbUser
+from src.models import DbNudge, DbUser, DbNotification
 from src.schemas import NudgeResponse
 from src.utils.db import DbSession
 from .subscription import post_notification
@@ -35,18 +37,47 @@ async def create_nudge(data: NudgeCreate, user: LoggedUser, db: DbSession):
         print(post_notification(device, data.message))
 
     nudge = DbNudge(**data.model_dump(), sender_id=user.id)  # type: ignore
+    notification = DbNotification(
+        content=data.message,
+        user_id=recipient.id,  # type: ignore
+    )
+    db.add(notification)
     db.add(nudge)
     db.commit()
+    db.refresh(nudge)
+
     return nudge
 
 
-@router.get("/received", response_model=list[NudgeResponse])
+@router.get("/last-received", response_model=list[NudgeResponse])
+async def get_last_received_nudges(user: LoggedUser, db: DbSession):
+    nudges = db.exec(select(DbNudge).where(DbNudge.recipient_id == user.id)).fetchmany(
+        5
+    )
+    return nudges
+
+
+@router.get("/last-sent", response_model=list[NudgeResponse])
+async def get_last_sent_nudges(user: LoggedUser, db: DbSession):
+    nudges = db.exec(select(DbNudge).where(DbNudge.sender_id == user.id)).fetchmany(5)
+    return nudges
+
+
+@router.get("/received", response_model=Page[NudgeResponse])
 async def get_received_nudges(user: LoggedUser, db: DbSession):
-    nudges = db.exec(select(DbNudge).where(DbNudge.recipient_id == user.id)).all()
-    return nudges
+    return paginate(
+        db,
+        select(DbNudge)
+        .where(DbNudge.recipient_id == user.id)
+        .order_by(DbNudge.created_at),
+    )
 
 
-@router.get("/sent", response_model=list[NudgeResponse])
+@router.get("/sent", response_model=Page[NudgeResponse])
 async def get_sent_nudges(user: LoggedUser, db: DbSession):
-    nudges = db.exec(select(DbNudge).where(DbNudge.sender_id == user.id)).all()
-    return nudges
+    return paginate(
+        db,
+        select(DbNudge)
+        .where(DbNudge.sender_id == user.id)
+        .order_by(DbNudge.created_at),
+    )

@@ -1,12 +1,14 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select, SQLModel
 from typing import Optional
+from webpush import WebPushSubscription
 
 
+from .subscription import post_notification
 from .auth import LoggedUser
 from src.utils.db import DbSession
 from src.schemas import UserResponse
-from src.models import DbUser, DbFriendship
+from src.models import DbUser, DbFriendship, DbNotification
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -47,6 +49,22 @@ async def follow_user(user_id: int, user: LoggedUser, db: DbSession):
         )
 
     new_relation: DbFriendship = DbFriendship(follower_id=user.id, following_id=target_user.id)  # type: ignore
+
+    notification_message: str = f"{user.username} has started following you."
+    user_notification: DbNotification = DbNotification(
+        content=notification_message,
+        user_id=target_user.id,  # type: ignore
+    )
+
+    for device in target_user.devices:
+        device = WebPushSubscription(
+            endpoint=device.endpoint,  # type: ignore
+            keys={"p256dh": device.p256dh, "auth": device.auth},  # type: ignore
+        )
+
+        post_notification(device, notification_message)
+
+    db.add(user_notification)
     db.add(new_relation)
     db.commit()
     db.refresh(new_relation)
@@ -76,6 +94,21 @@ async def unfollow_user(user_id: int, user: LoggedUser, db: DbSession):
             status_code=status.HTTP_409_CONFLICT, detail="Not following"
         )
 
+    notification_message: str = f"{user.username} has stopped following you."
+    user_notification: DbNotification = DbNotification(
+        content=notification_message,
+        user_id=target_user.id,  # type: ignore
+    )
+
+    for device in target_user.devices:
+        device = WebPushSubscription(
+            endpoint=device.endpoint,  # type: ignore
+            keys={"p256dh": device.p256dh, "auth": device.auth},  # type: ignore
+        )
+
+        post_notification(device, notification_message)
+
+    db.add(user_notification)
     db.delete(existing_relation)
     db.commit()
 
@@ -103,14 +136,11 @@ async def update_user(data: UpdateUserRequest, user: LoggedUser, db: DbSession):
                 status_code=status.HTTP_409_CONFLICT, detail="Username already taken"
             )
 
-    # Aktualizace dat přímo na `user`
-    update_data = data.model_dump(
-        exclude_unset=True
-    )  # Pouze explicitně nastavené hodnoty
+    update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(user, key, value)
 
-    db.add(user)  # Volitelné, pokud už je user v session, není nutné
+    db.add(user)
     db.commit()
     db.refresh(user)
 
